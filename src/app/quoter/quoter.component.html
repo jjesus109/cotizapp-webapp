@@ -1,1 +1,252 @@
-<p>quoter works!</p>
+<section class="hero is-link">
+  <div class="hero-body has-text-centered">
+    <p class="title">
+      Cotizador
+    </p>
+    <p class="subtitle">
+      Bienvenido a tu cotizador en linea!
+    </p>
+  </div>
+</section>
+
+<div class="container is-widescreen">
+    <div class="columns">
+        <div class="column is-one-quarter">
+          <div class="conatiner">
+            <section class="section has-text-centered">
+              <h1 class="subtitle">Configuracion de cotizacion</h1>
+              
+            </section>
+            <div class="field" [formGroup]="clientSearchForm">
+              <label class="label">Clientes</label>
+              <div class="dropdown" [ngClass]="{'is-active' : showClientResults}" id="clients-dropdown">
+                <div class="dropdown-trigger">
+                    <div class="field has-addons">
+                        <p class="control is-expanded has-icons-right">
+                            <input 
+                              class="input"
+                              type="search"
+                              placeholder="Busca a tu cliente"
+                              formControlName="searchClient"
+                            />
+                            <span class="icon is-small is-right"><i class="fas fa-search"></i></span>
+                        </p>
+                        <div class="control">
+                          <a class="button is-info" (click)="onSearchClient()">
+                            Buscar
+                          </a>
+                        </div>
+                    </div>
+                </div>
+
+                
+                  <select 
+                    formControlName="selectedClient"
+                    class="dropdown-content"
+                    *ngIf="showClientResults"
+                    (click)="onShowClientDetails()"
+                  >
+                    <option *ngFor="let fClients of foundClients" [value]="fClients._id">{{fClients.name}}</option>
+                  </select>
+            </div>
+            </div>
+
+            <div class="field is-grouped">
+              <div class="control">
+                <button 
+                  class="button is-link is-light"
+                >Agregar nuevo cliente</button>
+              </div>
+            </div>
+
+
+            <div class="field">
+              <label class="label">Productos</label>
+              <div class="field has-addons">
+                <div class="control">
+                  <input class="input" type="text" placeholder="Busca un producto">
+                </div>
+                <div class="control">
+                  <a class="button is-info">
+                    Buscar
+                  </a>
+                </div>
+              </div>
+
+              <!-- <p class="help is-success">This username is available</p> -->
+            </div>
+
+            <div class="field is-grouped">
+              <div class="control">
+                <button class="button is-link is-light">Agregar nuevo producto</button>
+              </div>
+            </div>
+      
+
+            <div class="field">
+              <label class="label">Servicios</label>
+              <div class="field has-addons">
+                <div class="control">
+                  <input class="input" type="text" placeholder="Busca un servicio">
+                </div>
+                <div class="control">
+                  <a class="button is-info">
+                    Buscar
+                  </a>
+                </div>
+              </div>
+              <!-- <p class="help is-success">This username is available</p> -->
+            </div>
+
+            <div class="field is-grouped">
+              <div class="control">
+                <button class="button is-link is-light">Agregar nuevo servicio</button>
+              </div>
+            </div>
+            <br>
+            <div class="container has-text-centered">
+              <div class="field is-grouped">
+                <div class="control">
+                  <button class="button is-primary">Guardar cotizacion</button>
+                </div>
+   
+              </div>
+            </div>
+            
+
+
+          </div>
+        </div>
+        <div class="column">
+          <section class="section has-text-centered">
+            <h1 class="subtitle">Tu cotizacion</h1>
+            
+          </section>
+          <!-- Resultado de cotizacion -->
+        <div class="column">
+          <div class="columns">
+            <div class="column">
+             
+              <div class="field">
+                <label class="label">Porcentaje de ganancia</label>
+                <div class="control">
+                  <input class="input" type="number" placeholder="Porcentaje de ganancia">
+                </div>
+              </div>
+              <button 
+                class="button is-primary" 
+              >Actualizar cotizacion</button>
+
+            </div>
+            <div class="column">
+              <div class="content is-small">
+                <h1 class="label">Datos del cliente</h1>
+                <p>Nombre: {{selectedClient.name}}</p>
+                <p>Correo: {{selectedClient.email}}</p>
+                <p>Ubicacion: {{selectedClient.location}}</p>
+                <p>Numero: {{selectedClient.phone_number}}</p>
+                
+              </div>
+            </div>
+          </div>
+          <!-- Resultado de cotizacion -->
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Nombre de servicio</th>
+                <th>Descripcion</th>
+                <th>Cantidad</th>
+                <th>Precio Cliente</th>
+                <th>Total</th>
+                <th>Precio Compra</th>
+                <th>Procentaje Ganancia</th>
+                <th>Ganancia</th>
+              </tr>
+            </thead>
+            <tfoot>
+              <tr>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th>Total</th>
+                <th></th>
+                <th></th>
+                <th>Total Ganancia</th>
+                <th></th>
+              </tr>
+            </tfoot>
+            <tbody>
+
+                
+              <tr>
+                <th>X</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                
+              </tr>
+              
+              
+            </tbody>
+          </table>
+
+        </div>
+
+      </div>
+        
+</div>
+  
+
+<div class="modal" [ngClass]="{'is-active' : activeNewClient}">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Crear un nuevo cliente</p>
+      <button class="delete" aria-label="close"></button>
+    </header>
+    <section class="modal-card-body">
+      <div class="field">
+        <label class="label">Nombre</label>
+        <div class="control">
+          <input class="input" type="text" placeholder="Nombre del cliente">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Correo</label>
+        <div class="control">
+          <input class="input" type="email" placeholder="Correo del cliente">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Ubicación</label>
+        <div class="control">
+          <input class="input" type="text" placeholder="Ubicacion del cliente">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Número telefonico</label>
+        <div class="control">
+          <input class="input" type="tel" placeholder="Numero telefonico del cliente">
+        </div>
+      </div>
+
+      <div class="field is-grouped">
+        <div class="control">
+          <button class="button is-primary is-light" (click)="activarClientModal()">Agregar nuevo cliente</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>

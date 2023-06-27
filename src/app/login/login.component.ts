@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { UsersService, UserRequest  } from '../services/users';
+import { UsersService  } from '../services/users';
 import { FormGroup, FormControl } from '@angular/forms';
-
+import { Router } from '@angular/router'
+import { Token } from "../models/token"
 
 @Component({
   selector: 'app-login',
@@ -10,24 +11,32 @@ import { FormGroup, FormControl } from '@angular/forms';
 })
 export class LoginComponent {
 
+  token: Token | undefined;
+
   profileForm = new FormGroup({
-    email: new FormControl(''),
+    username: new FormControl(''),
     password: new FormControl(''),
   });
 
-  constructor(public userService: UsersService) {}
+  constructor(
+    public userService: UsersService,
+    public router: Router
+  ) {}
 
   login() {
-    console.warn(this.profileForm.value);
-    console.warn(this.profileForm.value.email);
-    console.warn(this.profileForm.value.password);
     let user = {
-      "email": this.profileForm.value.email,
+      "username": this.profileForm.value.username,
       "password": this.profileForm.value.password
     }
-    this.userService.login(user).subscribe((data) => {
-      console.log(data);
-    });
+    this.userService.login(user).subscribe(
+      (token) => {
+        localStorage.setItem('token', token.access_token);
+        this.router.navigate(['/cotizador']).then(()=> window.location.reload());
+        
+      },
+      (error) =>{
+        console.error(error);
+      }
+    );
   }
-  
 }
