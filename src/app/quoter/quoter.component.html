@@ -55,6 +55,7 @@
               <div class="control">
                 <button 
                   class="button is-link is-light"
+                  (click)="activarClientModal()"
                 >Agregar nuevo cliente</button>
               </div>
             </div>
@@ -210,40 +211,60 @@
   <div class="modal-card">
     <header class="modal-card-head">
       <p class="modal-card-title">Crear un nuevo cliente</p>
-      <button class="delete" aria-label="close"></button>
+      <button class="delete" aria-label="close" (click)="activarClientModal()"></button>
     </header>
-    <section class="modal-card-body">
+    <section class="modal-card-body" [formGroup]="clientCreateForm">
       <div class="field">
         <label class="label">Nombre</label>
         <div class="control">
-          <input class="input" type="text" placeholder="Nombre del cliente">
+          <input 
+            class="input"
+            type="text"
+            placeholder="Nombre del cliente"
+            formControlName="name"
+          >
         </div>
       </div>
 
       <div class="field">
         <label class="label">Correo</label>
         <div class="control">
-          <input class="input" type="email" placeholder="Correo del cliente">
+          <input 
+            class="input"
+            type="email"
+            placeholder="Correo del cliente"
+            formControlName="email"
+          >
         </div>
       </div>
 
       <div class="field">
         <label class="label">Ubicación</label>
         <div class="control">
-          <input class="input" type="text" placeholder="Ubicacion del cliente">
+          <input
+            class="input"
+            type="text"
+            placeholder="Ubicacion del cliente"
+            formControlName="location"
+          >
         </div>
       </div>
 
       <div class="field">
         <label class="label">Número telefonico</label>
         <div class="control">
-          <input class="input" type="tel" placeholder="Numero telefonico del cliente">
+          <input 
+            class="input"
+            type="tel"
+            placeholder="Numero telefonico del cliente"
+            formControlName="phoneNumber"
+          >
         </div>
       </div>
 
       <div class="field is-grouped">
         <div class="control">
-          <button class="button is-primary is-light" (click)="activarClientModal()">Agregar nuevo cliente</button>
+          <button class="button is-primary is-light" (click)="crearCliente()">Agregar nuevo cliente</button>
         </div>
       </div>
     </section>
