@@ -2,9 +2,11 @@ import { Component } from '@angular/core';
 import { ClientService } from "../services/clients"
 import { ProductService } from "../services/products"
 import { ServicesService } from "../services/services"
+import { QuoterService } from "../services/quoters"
 import { Client } from '../models/client';
 import { Product } from '../models/product';
 import { Service } from '../models/service';
+import { Quoter } from '../models/quoter';
 import { FormGroup, FormControl } from '@angular/forms';
 
 @Component({
@@ -13,6 +15,9 @@ import { FormGroup, FormControl } from '@angular/forms';
   styleUrls: ['./quoter.component.css']
 })
 export class QuoterComponent {
+  IVA = 0.16;
+  percentage_in_advance_pay = 0.7;
+  revenue_percentage = 0.8;
   activeNewClient: boolean = true;
   foundClients: Client[] = [];
   foundProducts: Product[] = [];
@@ -24,6 +29,7 @@ export class QuoterComponent {
   selectedClient: Client = {} as Client;
   addedProducts: Product[] = [];
   addedServices: Service[] = [];
+  currentQuoterId: string = "";
   total: number = 0;
   revenue: number = 0;
   clientSearchForm = new FormGroup({
@@ -49,7 +55,8 @@ export class QuoterComponent {
   constructor(
     private clientService: ClientService,
     private productService: ProductService,
-    private servicesService: ServicesService
+    private servicesService: ServicesService,
+    private quoterService: QuoterService
   ){
   }
 
@@ -118,7 +125,7 @@ export class QuoterComponent {
         console.log("Productos encontrados", this.foundProducts)
       },
       (error)=>{
-        console.error("Could not find product" + error);
+        console.error("Could not find product", error);
         this.showClientResults = false;
       }
     )
@@ -148,7 +155,7 @@ export class QuoterComponent {
         console.log("Servicios encontrados", this.foundServices)
       },
       (error)=>{
-        console.error("Could not find product" + error);
+        console.error("Could not find service", error);
       }
     )
   }
@@ -207,4 +214,77 @@ export class QuoterComponent {
     this.revenue = product_revenue + service_revenue;
 
   }
+
+  obtenerFechaActual(): string {
+    const fecha = new Date();
+    const dia = fecha.getDate();
+    const mes = fecha.getMonth() + 1; // Los meses empiezan en 0, por lo que se suma 1
+    const año = fecha.getFullYear();
+    const hora = fecha.getHours();
+    const minuto = fecha.getMinutes();
+    const segundo = fecha.getSeconds();
+  
+    // Formateo de los valores para asegurar que siempre tengan 2 dígitos
+    const diaFormateado = dia < 10 ? `0${dia}` : `${dia}`;
+    const mesFormateado = mes < 10 ? `0${mes}` : `${mes}`;
+    const horaFormateada = hora < 10 ? `0${hora}` : `${hora}`;
+    const minutoFormateado = minuto < 10 ? `0${minuto}` : `${minuto}`;
+    const segundoFormateado = segundo < 10 ? `0${segundo}` : `${segundo}`;
+  
+    return `${año}-${mesFormateado}-${diaFormateado} ${horaFormateada}:${minutoFormateado}:${segundoFormateado}`;
+  };
+  
+
+
+
+  makeQuoter(): Quoter{
+    let iva = this.total * this.IVA;
+    let total_plus_iva = this.total + iva;
+    let first_pay = total_plus_iva * this.percentage_in_advance_pay;
+    let second_pay =  total_plus_iva * (1-this.percentage_in_advance_pay);
+    return {
+      name: "Quoter dummy",
+      date: this.obtenerFechaActual(),
+      subtotal: this.total,
+      iva: iva,
+      total: total_plus_iva,
+      percentage_in_advance_pay: this.percentage_in_advance_pay,
+      revenue_percentage: this.revenue_percentage,
+      first_pay: first_pay,
+      second_pay: second_pay,
+      description: "Cotizacion para" + this.selectedClient.name,
+      client: this.selectedClient,
+      services: this.addedServices,
+      products: this.addedProducts,
+    }
+  }
+
+  postQuoter(quoter: Quoter){
+    this.quoterService.createQuoter(quoter).subscribe(
+      (data)=>{
+        console.log("created quoter")
+        this.currentQuoterId = data._id
+      },
+      (error)=>{
+        console.error("Could not create quoter", error)
+      }
+    );
+  }
+
+  createQuoter(){
+    let quoter = this.makeQuoter()
+    if(this.currentQuoterId == ""){
+      this.postQuoter(quoter);
+      return
+    }
+    this.quoterService.updateQuoter(this.currentQuoterId, quoter).subscribe(
+      (data)=>{
+        console.log("updated quoter")
+      },
+      (error)=>{
+        console.error("Could not update quoter", error)
+      }
+    ); 
+  }
+
 }
