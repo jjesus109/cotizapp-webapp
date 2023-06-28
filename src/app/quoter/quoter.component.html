@@ -84,28 +84,48 @@
                 <button class="button is-link is-light">Agregar nuevo producto</button>
               </div>
             </div>
-      
-
-            <div class="field">
+            <!-- Propuesta nuevo servicio -->
+            <div class="field" [formGroup]="serviceSearchForm">
               <label class="label">Servicios</label>
-              <div class="field has-addons">
-                <div class="control">
-                  <input class="input" type="text" placeholder="Busca un servicio">
-                </div>
-                <div class="control">
-                  <a class="button is-info">
-                    Buscar
-                  </a>
-                </div>
-              </div>
-              <!-- <p class="help is-success">This username is available</p> -->
+              <div class="dropdown" [ngClass]="{'is-active' : showServiceResults}" id="service-dropdown">
+                <div class="dropdown-trigger">
+                    <div class="field has-addons">
+                        <p class="control is-expanded has-icons-right">
+                            <input 
+                              class="input"
+                              type="search"
+                              placeholder="Busca un servicio"
+                              formControlName="searchService"
+                            />
+                            <span class="icon is-small is-right"><i class="fas fa-search"></i></span>
+                        </p>
+                        <div class="control">
+                          <a class="button is-info" (click)="onSearchServices()">
+                            Buscar
+                          </a>
+                        </div>
+                    </div>
+                </div>  
+                <select 
+                  formControlName="selectedService"
+                  class="dropdown-content"
+                  *ngIf="showServiceResults"
+                  (click)="onSelectService()"
+                >
+                  <option *ngFor="let fService of foundServices" [value]="fService._id">{{fService.name}}</option>
+                </select>
+            </div>
             </div>
 
             <div class="field is-grouped">
               <div class="control">
-                <button class="button is-link is-light">Agregar nuevo servicio</button>
+                <button 
+                  class="button is-link is-light"
+                  (click)="activarClientModal()"
+                >Agregar nuevo servicio</button>
               </div>
             </div>
+
             <br>
             <div class="container has-text-centered">
               <div class="field is-grouped">
@@ -115,7 +135,6 @@
    
               </div>
             </div>
-            
 
 
           </div>
@@ -157,12 +176,12 @@
           <table class="table">
             <col width="5%" />
             <col width="10%" />
-            <col width="22%" />
+            <col width="27%" />
             <col width="10%" />
             <col width="10%" />
             <col width="10%" />
             <col width="10%" />
-            <col width="10%" />
+            <col width="5%" />
             <col width="13%" />
             <thead>
               <tr>
@@ -183,7 +202,7 @@
                   class="is-checkradio is-circle"
                   [id]="'checkbuttom' + product._id"
                   type="checkbox"
-                  (click)="onSelected($event, product)"
+                  (click)="onProductSelected($event, product)"
                 />
                 <td>{{product.title | slice : 0:20}}</td>
                 <td>{{product.title | slice : 20:100}}</td>
@@ -201,9 +220,18 @@
           </table>
 
           <table class="table">
+            <col width="5%" />
+            <col width="10%" />
+            <col width="27%" />
+            <col width="10%" />
+            <col width="10%" />
+            <col width="10%" />
+            <col width="10%" />
+            <col width="5%" />
+            <col width="13%" />
             <thead>
               <tr>
-                <th></th>
+                <th>X</th>
                 <th>Nombre de servicio</th>
                 <th>Descripcion</th>
                 <th>Cantidad</th>
@@ -221,28 +249,31 @@
                 <th></th>
                 <th></th>
                 <th>Total</th>
-                <th></th>
+                <th>{{total | currency}}</th>
                 <th></th>
                 <th>Total Ganancia</th>
-                <th></th>
+                <th>{{revenue | currency}}</th>
               </tr>
             </tfoot>
             <tbody>
 
-            <div *ngFor="let product of addedProducts">
-              <tr>
-                <th>X</th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+              <tr *ngFor="let service of addedServices">
+                <input
+                  class="is-checkradio is-circle"
+                  [id]="'checkbuttom' + service._id"
+                  type="checkbox"
+                  (click)="onServiceSelected($event, service)"
+                />
+                <td>{{service.name | slice : 0:20}}</td>
+                <td>{{service.description | slice : 0:100}}</td>
+                <td>1</td>
+                <td>{{service.client_price | currency}}</td>
+                <td>{{service.client_price | currency}}</td>
+                <td>{{service.real_price | currency}}</td>
+                <td>{{service.real_price / service.client_price }}</td>
+                <td>{{ service.client_price - service.real_price }}</td>
                 
-              </tr>
-            </div>      
+              </tr>   
               
             </tbody>
           </table>
