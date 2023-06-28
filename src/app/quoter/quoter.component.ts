@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { ClientService } from "../services/clients"
+import { ProductService } from "../services/products"
 import { Client } from '../models/client';
+import { Product } from '../models/product';
 import { FormGroup, FormControl } from '@angular/forms';
 
 @Component({
@@ -11,12 +13,20 @@ import { FormGroup, FormControl } from '@angular/forms';
 export class QuoterComponent {
   activeNewClient: boolean = true;
   foundClients: Client[] = [];
+  foundProducts: Product[] = [];
   searchClient: string = "";
   showClientResults: boolean = false;
+  showProductsResults: boolean = false;
   selectedClient: Client = {} as Client;
+  addedProducts: Product[] = [];
+  addedService: Service
   clientSearchForm = new FormGroup({
     searchClient: new FormControl(''),
     selectedClient: new FormControl('')
+  });
+  productSearchForm = new FormGroup({
+    searchProduct: new FormControl(''),
+    
   });
   clientCreateForm = new FormGroup({
     name: new FormControl(''),
@@ -25,7 +35,10 @@ export class QuoterComponent {
     phoneNumber: new FormControl('')
   });
 
-  constructor(private clientService: ClientService){
+  constructor(
+    private clientService: ClientService,
+    private productService: ProductService
+  ){
   }
 
   ngOnInit(){
@@ -34,6 +47,10 @@ export class QuoterComponent {
 
   activarClientModal(){
     this.activeNewClient = !this.activeNewClient;
+  }
+
+  activateProductModal(){
+    this.showProductsResults = !this.showProductsResults;
   }
 
   onSearchClient(){
@@ -76,5 +93,30 @@ export class QuoterComponent {
       }
     )
     console.log("Cliente creado");
+  }
+
+  onSearchProducts(){
+    let productToSearch: any =  this.productSearchForm.value.searchProduct;
+    console.log("Producto a buscar: ", productToSearch)
+    this.productService.searchProduct( productToSearch).subscribe(
+      (data)=>{
+        this.foundProducts = data
+        this.showProductsResults = true;
+        console.log("Productos encontrados", this.foundProducts)
+      },
+      (error)=>{
+        console.error("Could not find product" + error);
+        this.showClientResults = false;
+      }
+    )
+  }
+  addOnQuoter(event: any, product: Product){
+    this.addedProducts.push(product);
+    this.activateProductModal();
+  }
+
+  onSelected(event: any, product: Product){
+    let newProducts = this.addedProducts.filter(item => item._id != product._id);
+    this.addedProducts = newProducts;
   }
 }

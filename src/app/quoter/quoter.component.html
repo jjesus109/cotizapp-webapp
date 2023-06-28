@@ -37,17 +37,15 @@
                           </a>
                         </div>
                     </div>
-                </div>
-
-                
-                  <select 
-                    formControlName="selectedClient"
-                    class="dropdown-content"
-                    *ngIf="showClientResults"
-                    (click)="onShowClientDetails()"
-                  >
-                    <option *ngFor="let fClients of foundClients" [value]="fClients._id">{{fClients.name}}</option>
-                  </select>
+                </div>  
+                <select 
+                  formControlName="selectedClient"
+                  class="dropdown-content"
+                  *ngIf="showClientResults"
+                  (click)="onShowClientDetails()"
+                >
+                  <option *ngFor="let fClients of foundClients" [value]="fClients._id">{{fClients.name}}</option>
+                </select>
             </div>
             </div>
 
@@ -61,20 +59,24 @@
             </div>
 
 
-            <div class="field">
+            <div class="field" [formGroup]="productSearchForm">
               <label class="label">Productos</label>
               <div class="field has-addons">
                 <div class="control">
-                  <input class="input" type="text" placeholder="Busca un producto">
+                  <input 
+                    class="input"
+                    type="text"
+                    placeholder="Busca un producto"
+                    formControlName="searchProduct"
+                  >
                 </div>
                 <div class="control">
-                  <a class="button is-info">
+                  <a class="button is-info" (click)="onSearchProducts()">
                     Buscar
                   </a>
                 </div>
               </div>
 
-              <!-- <p class="help is-success">This username is available</p> -->
             </div>
 
             <div class="field is-grouped">
@@ -153,6 +155,52 @@
           <!-- Resultado de cotizacion -->
 
           <table class="table">
+            <col width="5%" />
+            <col width="10%" />
+            <col width="22%" />
+            <col width="10%" />
+            <col width="10%" />
+            <col width="10%" />
+            <col width="10%" />
+            <col width="10%" />
+            <col width="13%" />
+            <thead>
+              <tr>
+                <th>X</th>
+                <th>Nombre de producto</th>
+                <th>Descripcion</th>
+                <th>Cantidad</th>
+                <th>Precio Cliente</th>
+                <th>Total</th>
+                <th>Precio Compra</th>
+                <th>Procentaje Ganancia</th>
+                <th>Ganancia</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let product of addedProducts">
+                <input
+                  class="is-checkradio is-circle"
+                  [id]="'checkbuttom' + product._id"
+                  type="checkbox"
+                  (click)="onSelected($event, product)"
+                />
+                <td>{{product.title | slice : 0:20}}</td>
+                <td>{{product.title | slice : 20:100}}</td>
+                <td>1</td>
+                <td>{{product.list_price | currency}}</td>
+                <td>{{product.list_price | currency}}</td>
+                <td>{{product.discount_price | currency}}</td>
+                <td>{{product.discount_price / product.list_price }}</td>
+                <td>{{ product.list_price - product.discount_price }}</td>
+                
+              </tr>
+
+              
+            </tbody>
+          </table>
+
+          <table class="table">
             <thead>
               <tr>
                 <th></th>
@@ -181,7 +229,7 @@
             </tfoot>
             <tbody>
 
-                
+            <div *ngFor="let product of addedProducts">
               <tr>
                 <th>X</th>
                 <td></td>
@@ -194,18 +242,17 @@
                 <td></td>
                 
               </tr>
-              
+            </div>      
               
             </tbody>
           </table>
-
         </div>
 
       </div>
         
 </div>
   
-
+<!-- Modal de cliente nuevo -->
 <div class="modal" [ngClass]="{'is-active' : activeNewClient}">
   <div class="modal-background"></div>
   <div class="modal-card">
@@ -267,6 +314,53 @@
           <button class="button is-primary is-light" (click)="crearCliente()">Agregar nuevo cliente</button>
         </div>
       </div>
+    </section>
+
+  </div>
+</div>
+
+
+
+<!-- Modal de productos a buscar -->
+
+<div class="modal" [ngClass]="{'is-active' : showProductsResults}">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Selecciona el producto a agregar</p>
+      <button class="delete" aria-label="close" (click)="activateProductModal()"></button>
+    </header>
+    <section class="modal-card-body" [formGroup]="clientCreateForm">
+     <div *ngFor="let product of foundProducts">
+      <div class="card">
+        <div class="card-image">
+          <figure class="image is-4by3">
+            <img src="{{product.image}}" alt="Placeholder image">
+          </figure>
+        </div>
+        <div class="card-content">
+          <div class="media">
+            <div class="media-content">
+              <p class="title is-4">{{product.title}}</p>
+              <p class="subtitle is-6">Stock: {{product.stock_number}}</p>
+              <p class="subtitle is-6">Marca: {{product.brand}}}</p>
+            </div>
+          </div>
+      
+          <div class="content">
+            <p>Precio cliente: {{product.discount_price}}</p>
+            <p>Precio real: {{product.list_price}}</p>
+            <p>Peso: {{product.weight}}</p>
+            <button
+              class="button is-primary is-light"
+              (click)="addOnQuoter($event, product)"
+            >Agregar a cotizacion</button>
+            
+          </div>
+        </div>
+      </div>
+      <br>
+     </div>
     </section>
 
   </div>
