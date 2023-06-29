@@ -22,13 +22,16 @@ export class QuoterComponent {
   foundClients: Client[] = [];
   foundProducts: Product[] = [];
   foundServices: Service[] = [];
+  foundQuoters: Quoter[] = [];  
   searchClient: string = "";
   showClientResults: boolean = false;
   showProductsResults: boolean = false;
   showServiceResults: boolean = false;
+  showQuoterResults: boolean = false;
   selectedClient: Client = {} as Client;
   addedProducts: Product[] = [];
   addedServices: Service[] = [];
+  currentQuoter: Quoter = {} as Quoter;
   currentQuoterId: string = "";
   total: number = 0;
   revenue: number = 0;
@@ -50,6 +53,11 @@ export class QuoterComponent {
   serviceSearchForm = new FormGroup({
     searchService: new FormControl(''),
     selectedService: new FormControl('')
+  });
+
+  quoterSearchForm = new FormGroup({
+    searchQuoter: new FormControl(''),
+    
   });
 
   constructor(
@@ -90,6 +98,7 @@ export class QuoterComponent {
   onShowClientDetails(){
     let client = this.foundClients.filter(client => client._id == this.clientSearchForm.value.selectedClient) ;
     this.selectedClient = client[0];
+    this.currentQuoter.client = this.selectedClient;
     this.showClientResults = false;
   }
 
@@ -105,6 +114,7 @@ export class QuoterComponent {
       (data)=>{
         console.log("Client created");
         this.selectedClient = clientToCreate;
+        this.currentQuoter.client = this.selectedClient;
         this.activarClientModal();
       },
       (error)=>{
@@ -132,6 +142,7 @@ export class QuoterComponent {
   }
   addOnQuoter(event: any, product: Product){
     this.addedProducts.push(product);
+    this.currentQuoter.products = this.addedProducts;
     this.activateProductModal();
     this.updateTotal();
     this.updateRevenue();
@@ -140,6 +151,7 @@ export class QuoterComponent {
   onProductSelected(event: any, product: Product){
     let newProducts = this.addedProducts.filter(item => item._id != product._id);
     this.addedProducts = newProducts;
+    this.currentQuoter.products = this.addedProducts;
     this.updateTotal();
     this.updateRevenue();
   }
@@ -166,6 +178,7 @@ export class QuoterComponent {
       (data)=>{
         this.showServiceResults = false;
         this.addedServices.push(data);
+        this.currentQuoter.services = this.addedServices;
         this.updateTotal();
       this.updateRevenue();
       },
@@ -179,6 +192,7 @@ export class QuoterComponent {
   onServiceSelected(event: any, service: Service){
     let newServices = this.addedServices.filter(item => item._id != service._id);
     this.addedServices = newServices;
+    this.currentQuoter.services = this.addedServices;
     this.updateTotal();
     this.updateRevenue();
   }
@@ -190,7 +204,7 @@ export class QuoterComponent {
     });
     let product_total = 0
     this.addedProducts.forEach(product =>{
-      product_total += product.list_price
+      product_total += product.list_price;
 
     });
 
@@ -218,13 +232,12 @@ export class QuoterComponent {
   obtenerFechaActual(): string {
     const fecha = new Date();
     const dia = fecha.getDate();
-    const mes = fecha.getMonth() + 1; // Los meses empiezan en 0, por lo que se suma 1
+    const mes = fecha.getMonth() + 1;
     const año = fecha.getFullYear();
     const hora = fecha.getHours();
     const minuto = fecha.getMinutes();
     const segundo = fecha.getSeconds();
   
-    // Formateo de los valores para asegurar que siempre tengan 2 dígitos
     const diaFormateado = dia < 10 ? `0${dia}` : `${dia}`;
     const mesFormateado = mes < 10 ? `0${mes}` : `${mes}`;
     const horaFormateada = hora < 10 ? `0${hora}` : `${hora}`;
@@ -237,33 +250,26 @@ export class QuoterComponent {
 
 
 
-  makeQuoter(): Quoter{
+  updateQuoter(){
     let iva = this.total * this.IVA;
     let total_plus_iva = this.total + iva;
     let first_pay = total_plus_iva * this.percentage_in_advance_pay;
     let second_pay =  total_plus_iva * (1-this.percentage_in_advance_pay);
-    return {
-      name: "Quoter dummy",
-      date: this.obtenerFechaActual(),
-      subtotal: this.total,
-      iva: iva,
-      total: total_plus_iva,
-      percentage_in_advance_pay: this.percentage_in_advance_pay,
-      revenue_percentage: this.revenue_percentage,
-      first_pay: first_pay,
-      second_pay: second_pay,
-      description: "Cotizacion para" + this.selectedClient.name,
-      client: this.selectedClient,
-      services: this.addedServices,
-      products: this.addedProducts,
-    }
+    this.currentQuoter.date = this.obtenerFechaActual();
+    this.currentQuoter.subtotal = this.total;
+    this.currentQuoter.iva = iva;
+    this.currentQuoter.total = total_plus_iva;
+    this.currentQuoter.percentage_in_advance_pay = this.percentage_in_advance_pay;
+    this.currentQuoter.revenue_percentage = this.revenue_percentage;
+    this.currentQuoter.first_pay = first_pay;
+    this.currentQuoter.second_pay = second_pay;
   }
 
   postQuoter(quoter: Quoter){
     this.quoterService.createQuoter(quoter).subscribe(
       (data)=>{
         console.log("created quoter")
-        this.currentQuoterId = data._id
+        this.currentQuoter = data
       },
       (error)=>{
         console.error("Could not create quoter", error)
@@ -272,12 +278,14 @@ export class QuoterComponent {
   }
 
   createQuoter(){
-    let quoter = this.makeQuoter()
-    if(this.currentQuoterId == ""){
-      this.postQuoter(quoter);
+    this.updateQuoter();
+    let quoter_id: string = ""; 
+    if(!this.currentQuoter._id){
+      this.postQuoter(this.currentQuoter);
       return
     }
-    this.quoterService.updateQuoter(this.currentQuoterId, quoter).subscribe(
+    quoter_id = this.currentQuoter._id;
+    this.quoterService.updateQuoter(quoter_id, this.currentQuoter).subscribe(
       (data)=>{
         console.log("updated quoter")
       },
@@ -287,4 +295,41 @@ export class QuoterComponent {
     ); 
   }
 
+  onSearchQuoter(){
+    let quoterToSearch: any =  this.quoterSearchForm.value.searchQuoter;
+    console.log("Cotizacion a buscar: ", quoterToSearch)
+    this.quoterService.searchQuoter(quoterToSearch).subscribe(
+      (data)=>{
+        this.foundQuoters = data;
+        this.showQuoterResults = true;
+        console.log("Cotizaciones encontradas", this.foundQuoters)
+      },
+      (error)=>{
+        console.error("Could not find product", error);
+        this.showQuoterResults = false;
+      }
+    )
+  }
+
+  activateQuoterModal(){
+    this.showQuoterResults = !this.showQuoterResults;
+  }
+
+  selectQuoter(event: any, quoter: Quoter){
+    this.currentQuoter = quoter;
+    let current_products: Product[] = [];
+    let current_services: Service[] = [];
+    if (this.currentQuoter.products){
+      current_products = this.currentQuoter.products
+    }
+    if (this.currentQuoter.services){
+      current_services = this.currentQuoter.services
+    }
+    this.addedProducts = current_products;
+    this.addedServices =  current_services;
+    this.selectedClient = this.currentQuoter.client;
+    this.updateTotal();
+    this.updateRevenue();
+    this.showQuoterResults = false;
+  }
 }

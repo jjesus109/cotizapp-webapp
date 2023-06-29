@@ -12,7 +12,31 @@
 <div class="container is-widescreen">
     <div class="columns">
         <div class="column is-one-quarter">
-          <div class="conatiner">
+          <div class="container">
+            <section class="section has-text-centered">
+              <h1 class="subtitle">Busqueda de cotizacion</h1>
+              
+            </section>
+            <div class="field" [formGroup]="quoterSearchForm">
+              <label class="label">Cotizacion</label>
+              <div class="field has-addons">
+                <div class="control">
+                  <input 
+                    class="input"
+                    type="text"
+                    placeholder="Busca una cotizacion"
+                    formControlName="searchQuoter"
+                  >
+                </div>
+                <div class="control">
+                  <a class="button is-info" (click)="onSearchQuoter()">
+                    Buscar
+                  </a>
+                </div>
+              </div>
+
+            </div>
+
             <section class="section has-text-centered">
               <h1 class="subtitle">Configuracion de cotizacion</h1>
               
@@ -79,11 +103,7 @@
 
             </div>
 
-            <div class="field is-grouped">
-              <div class="control">
-                <button class="button is-link is-light">Agregar nuevo producto</button>
-              </div>
-            </div>
+
             <!-- Propuesta nuevo servicio -->
             <div class="field" [formGroup]="serviceSearchForm">
               <label class="label">Servicios</label>
@@ -156,8 +176,35 @@
             <h1 class="subtitle">Tu cotizacion</h1>
             
           </section>
+          <div class="columns">
+            <div class="column">
+              <div class="field">
+                <label class="label">Nombre de cotizacion</label>
+                <div class="control">
+                  <input
+                    class="input"
+                    type="text"
+                    placeholder="Cotizacion de Fulanito"
+                    [(ngModel)]="currentQuoter.name"
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <label class="label">Descripcion de cotizacion</label>
+              <div class="control">
+                <input
+                  class="input"
+                  type="text"
+                  placeholder="Paquete de 6 camaras y ..."
+                  [(ngModel)]="currentQuoter.description"
+                >
+              </div>
+            </div>
+        </div>
           <!-- Resultado de cotizacion -->
         <div class="column">
+          
           <div class="columns">
             <div class="column">
              
@@ -216,8 +263,8 @@
                   type="checkbox"
                   (click)="onProductSelected($event, product)"
                 />
-                <td>{{product.title | slice : 0:20}}</td>
-                <td>{{product.title | slice : 20:100}}</td>
+                <td>{{product.title | slice : 0:20}} ...</td>
+                <td>{{product.title | slice : 20:100}} ...</td>
                 <td>1</td>
                 <td>{{product.list_price | currency}}</td>
                 <td>{{product.list_price | currency}}</td>
@@ -261,12 +308,15 @@
                 <th></th>
                 <th></th>
                 <th>Total</th>
-                <th>{{total | currency}}</th>
+                <th>{{total + (total * IVA)  | currency}}</th>
                 <th></th>
-                <th>Total Ganancia</th>
-                <th>{{revenue | currency}}</th>
+                <th></th>
+                <th></th>
               </tr>
             </tfoot>
+           
+
+
             <tbody>
 
               <tr *ngFor="let service of addedServices">
@@ -276,8 +326,8 @@
                   type="checkbox"
                   (click)="onServiceSelected($event, service)"
                 />
-                <td>{{service.name | slice : 0:20}}</td>
-                <td>{{service.description | slice : 0:100}}</td>
+                <td>{{service.name | slice : 0:20}} ...</td>
+                <td>{{service.description | slice : 0:100}} ...</td>
                 <td>1</td>
                 <td>{{service.client_price | currency}}</td>
                 <td>{{service.client_price | currency}}</td>
@@ -286,7 +336,28 @@
                 <td>{{ service.client_price - service.real_price }}</td>
                 
               </tr>   
-              
+                <tr>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th>Subtotal</th>
+                  <th>{{total | currency}}</th>
+                  <th></th>
+                  <th>Total Ganancia</th>
+                  <th>{{revenue | currency}}</th>
+                </tr>
+                <tr>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th>Iva</th>
+                  <th>{{total * IVA | currency}}</th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                </tr>
             </tbody>
           </table>
         </div>
@@ -400,6 +471,61 @@
             >Agregar a cotizacion</button>
             
           </div>
+        </div>
+      </div>
+      <br>
+     </div>
+    </section>
+
+  </div>
+</div>
+
+
+
+
+<!-- Modal de cotizacion a buscar -->
+
+<div class="modal" [ngClass]="{'is-active' : showQuoterResults}">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Selecciona la cotizacion a visualizar</p>
+      <button class="delete" aria-label="close" (click)="activateQuoterModal()"></button>
+    </header>
+    <section class="modal-card-body" [formGroup]="clientCreateForm">
+     <div *ngFor="let quoter of foundQuoters">
+      <div class="card">
+        <div class="card-content">
+          <div class="media">
+            <div class="media-content">
+              <p class="title is-4">{{quoter.name}}</p>
+              <p class="subtitle is-6">Descripcion: {{quoter.description}}</p>
+              <p class="subtitle is-6">Fecha: {{quoter.date}}</p>
+            </div>
+          </div>
+      
+          <div class="content">
+            <p>Subtotal: {{quoter.subtotal}}</p>
+            <p>Iva real: {{quoter.iva}}</p>
+            <p>Total: {{quoter.total}}</p>
+            
+          </div>
+          <p class="title is-4">Servicios</p>
+          <div class="content"  *ngFor="let serv of quoter.services">
+            <p>Nombre de servicio: {{serv.name}}</p>
+            <p>Descripcion: {{serv.description | slice : 0:30}} ...</p>
+            <p>Precio cliente: {{serv.client_price | currency}}</p>
+          </div>
+          <p class="title is-4">Productos</p>
+          <div class="content"  *ngFor="let prod of quoter.products">
+            <p>Nombre: {{prod.title}}</p>
+            <p>Precio cliente: {{prod.list_price}}</p>
+          </div>
+          <button
+            class="button is-primary is-light"
+            (click)="selectQuoter($event, quoter)"
+          >Seleccionar esta cotizacion</button>
+
         </div>
       </div>
       <br>
