@@ -19,3 +19,8 @@ export interface Quoter{
     services?: Service[];
     products?: Product[];
 }
+
+
+export interface QuoterId{
+    id: string;
+}

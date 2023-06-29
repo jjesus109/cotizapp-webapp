@@ -23,7 +23,7 @@
                 <div class="control">
                   <input 
                     class="input"
-                    type="text"
+                    type="search"
                     placeholder="Busca una cotizacion"
                     formControlName="searchQuoter"
                   >
@@ -35,6 +35,15 @@
                 </div>
               </div>
 
+            </div>
+            <div class="field is-grouped">
+              <div class="control">
+                <button 
+                class="button is-primary is-light"
+                (click)="newQuoter()"
+              >Nueva cotizacion</button>
+              </div>
+ 
             </div>
 
             <section class="section has-text-centered">
@@ -89,7 +98,7 @@
                 <div class="control">
                   <input 
                     class="input"
-                    type="text"
+                    type="search"
                     placeholder="Busca un producto"
                     formControlName="searchProduct"
                   >
@@ -137,14 +146,14 @@
             </div>
             </div>
 
-            <div class="field is-grouped">
+            <!-- <div class="field is-grouped">
               <div class="control">
                 <button 
                   class="button is-link is-light"
                   (click)="activarClientModal()"
                 >Agregar nuevo servicio</button>
               </div>
-            </div>
+            </div> -->
 
             <br>
             <div class="container has-text-centered">
@@ -162,7 +171,10 @@
             <div class="container has-text-centered">
               <div class="field is-grouped">
                 <div class="control">
-                  <button class="button is-primary">Convertir esta cotizacion a venta</button>
+                  <button 
+                    class="button is-primary"
+                    (click)="createSale()"
+                  >Convertir esta cotizacion a venta</button>
                 </div>
    
               </div>

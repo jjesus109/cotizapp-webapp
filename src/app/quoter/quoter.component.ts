@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ClientService } from "../services/clients"
 import { ProductService } from "../services/products"
 import { ServicesService } from "../services/services"
+import { SalesService } from "../services/sales"
 import { QuoterService } from "../services/quoters"
 import { Client } from '../models/client';
 import { Product } from '../models/product';
@@ -64,7 +65,8 @@ export class QuoterComponent {
     private clientService: ClientService,
     private productService: ProductService,
     private servicesService: ServicesService,
-    private quoterService: QuoterService
+    private quoterService: QuoterService,
+    private salesService: SalesService
   ){
   }
 
@@ -291,6 +293,10 @@ export class QuoterComponent {
       },
       (error)=>{
         console.error("Could not update quoter", error)
+        if (error.status == 409){
+          alert("No se puede modificar una cotizacion que ya se vendio")
+        }
+        
       }
     ); 
   }
@@ -331,5 +337,30 @@ export class QuoterComponent {
     this.updateTotal();
     this.updateRevenue();
     this.showQuoterResults = false;
+  }
+  newQuoter(){
+    this.currentQuoter = {} as Quoter;
+    this.selectedClient= {} as Client;
+    this.addedProducts = [];
+    this.addedServices = [];
+    this.total = 0;
+  }
+  
+  createSale(){
+    if (!this.currentQuoter._id){
+      alert("No se puede crear una venta sin cotizacion guardada");
+      return;
+    }
+    let quoter_id = {
+      id: this.currentQuoter._id
+    };
+    this.salesService.createSale(quoter_id).subscribe(
+      (data)=>{
+        console.log("Venta hecha");
+      },
+      (error)=>{
+        console.log("Problemas para crear venta", error);
+      },
+    );
   }
 }
